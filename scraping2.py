@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 import config as cg
 
+
 class Scarper:
     def __init__(self,name, cities_l):
         self.name = name
