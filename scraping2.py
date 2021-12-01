@@ -113,7 +113,7 @@ class Scarper:
 
 if __name__ == '__main__':
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
-    cities_list = cities['שם_ישוב'].str.strip().tolist()
+    cities_list = cities['שם_ישוב'].sample(10).str.strip().tolist()
     scrapper1 = Scarper(name='one', cities_l=cities_list)
     driver1 = scrapper1.set_driver()
     data = scrapper1.extract()
