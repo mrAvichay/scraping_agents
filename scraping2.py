@@ -84,21 +84,21 @@ class Scarper():
                     table = self.driver.find_element(By.XPATH, "//table/tbody")
                     # append element to lists
                     # license
-                    license.extend(
+                    self.license.extend(
                         [el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[1]")])
                     # name
-                    name.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[2]")])
+                    self.name.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[2]")])
                     # mail
-                    mail.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[3]")])
+                    self.mail.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[3]")])
                     # agency
-                    agency.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[7]")])
+                    self.agency.extend([el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[7]")])
                     # city
-                    city.extend([city_selected] * len(table.find_elements(By.XPATH, "//tr/td[7]")))
+                    self.city.extend([city_selected] * len(table.find_elements(By.XPATH, "//tr/td[7]")))
                     # is pensioni
-                    is_pensioni.extend(
+                    self.is_pensioni.extend(
                         [el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[8]")])
                     # is elementar
-                    is_elementar.extend(
+                    self.is_elementar.extend(
                         [el.get_attribute("innerText") for el in table.find_elements(By.XPATH, "//tr/td[9]")])
                     self.driver.find_element(By.XPATH, "//a[@ng-switch-when='next']").click()  # click next
                     self.driver.implicitly_wait(10)
