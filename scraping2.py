@@ -7,14 +7,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import NoSuchElementException, \
-    ElementNotInteractableException, StaleElementReferenceException, \
-    TimeoutException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 
 
-class Scarper():
-    def __init__(self, cities_l):
+class Scarper:
+    def __init__(self,name, cities_l):
+        self.name = name
         self.cities = cities_l
         self.license, \
         self.name, \
@@ -33,6 +31,9 @@ class Scarper():
         self.driver.implicitly_wait(10)
         self.driver.maximize_window()
         return self.driver
+
+    def get_name(self):
+        return self.name
 
     def extract(self):
         select_choice1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions) \
@@ -59,6 +60,7 @@ class Scarper():
                 search1.send_keys(Keys.RETURN)
             except TimeoutException:
                 print('random error')
+                continue
             try:
                 self.driver.find_element(By.LINK_TEXT, "בחר").click()
                 self.driver.find_element(By.ID, "e_1596528447512-995-1").click()  # perform search
@@ -114,7 +116,7 @@ class Scarper():
 if __name__ == '__main__':
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
     cities_list = cities['שם_ישוב'].str.strip().tolist()
-    scrapper1 = Scarper(cities_list)
-    driver1 = Scarper.set_driver()
-    data = Scarper.extract(cities_list)
-    pd.DataFrame(data).to_csv('final.csv', index=False)
+    scrapper1 = Scarper(name='one', cities_l=cities_list)
+    driver1 = scrapper1.set_driver()
+    data = scrapper1.extract()
+    pd.DataFrame(data).to_csv('final'+scrapper1.get_name()+'.csv', index=False)
