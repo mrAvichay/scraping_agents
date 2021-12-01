@@ -117,5 +117,5 @@ if __name__=='__main__':
         .until(EC.element_to_be_clickable((By.XPATH, "//div[@aria-label='סוכן ביטוח']")))
     agent_choice.click()
     data=extract(cities_list)
-    pd.DataFrame().to_csv('final.csv',index=False)
+    pd.DataFrame(data).to_csv('final.csv',index=False)
 
