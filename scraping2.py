@@ -12,7 +12,7 @@ import logging
 
 class Scarper:
     def __init__(self, scrapper_name, cities_l, logger=None):
-        self.scrapper_name = name
+        self.scrapper_name = scrapper_name
         self.cities = cities_l
         self.license, \
         self.name, \
@@ -97,7 +97,7 @@ class Scarper:
                     self.is_elementar.extend(
                         [el.get_attribute("innerText") for el in table.find_elements(By.XPATH, cg.IS_ELEMENTAR)])
                     self.driver.find_element(By.XPATH, cg.NEXT_RESULTS_PAGE).click()  # click next
-                    self.driver.implicitly_wait(10)
+                    self.driver.implicitly_wait(5)
             except NoSuchElementException as e3:
                 self.skipped.append(city_selected)
                 continue
@@ -115,5 +115,5 @@ if __name__ == '__main__':
     scrapper1 = Scarper(scrapper_name='one', cities_l=cities_list)
     driver1 = scrapper1.set_driver()
     data, skipped_items = scrapper1.extract()
-    pd.DataFrame(data).to_csv('final'+scrapper1.get_name()+'.csv', index=False)
+    pd.DataFrame(data).to_csv('final_'+scrapper1.get_name()+'.csv', index=False)
     print("skipped on: " + ','.join(skipped_items))
