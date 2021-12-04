@@ -7,11 +7,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 import config as cg
+import logging
 
 
 class Scarper:
-    def __init__(self,name, cities_l):
-        self.name = name
+    def __init__(self, scrapper_name, cities_l, logger=None):
+        self.scrapper_name = name
         self.cities = cities_l
         self.license, \
         self.name, \
@@ -33,7 +34,7 @@ class Scarper:
         return self.driver
 
     def get_name(self):
-        return self.name
+        return self.scrapper_name
 
     def extract(self):
         select_choice1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions) \
@@ -48,6 +49,7 @@ class Scarper:
             try:
                 search1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions). \
                     until(EC.presence_of_element_located((By.ID, cg.SEARCH_BOX)))
+                search1.clear()
                 search1.send_keys(city_selected)
                 search1.send_keys(Keys.RETURN)
             except TimeoutException:
@@ -107,9 +109,10 @@ class Scarper:
 
 
 if __name__ == '__main__':
+    # rootlogger = logging.RootLogger('root')
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
     cities_list = cities['שם_ישוב'].sample(10).str.strip().tolist()
-    scrapper1 = Scarper(name='one', cities_l=cities_list)
+    scrapper1 = Scarper(scrapper_name='one', cities_l=cities_list)
     driver1 = scrapper1.set_driver()
     data, skipped_items = scrapper1.extract()
     pd.DataFrame(data).to_csv('final'+scrapper1.get_name()+'.csv', index=False)
