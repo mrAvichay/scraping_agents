@@ -7,11 +7,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 import config as cg
-import logging
 
 
 class Scarper:
-    def __init__(self, scrapper_name, cities_l, logger=None):
+    def __init__(self, scrapper_name, cities_l):
         self.scrapper_name = scrapper_name
         self.cities = cities_l
         self.license, \
@@ -109,7 +108,6 @@ class Scarper:
 
 
 if __name__ == '__main__':
-    # rootlogger = logging.RootLogger('root')
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
     cities_list = cities['שם_ישוב'].sample(10).str.strip().tolist()
     scrapper1 = Scarper(scrapper_name='one', cities_l=cities_list)
