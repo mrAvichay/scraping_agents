@@ -8,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 import config as cg
 
-
 class Scarper:
     def __init__(self, scrapper_name, cities_l):
         self.scrapper_name = scrapper_name
@@ -45,6 +44,7 @@ class Scarper:
         for i in range(0, len(self.cities)):
             city_selected = self.cities[i]
             print(city_selected)
+
             try:
                 search1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions). \
                     until(EC.presence_of_element_located((By.ID, cg.SEARCH_BOX)))
@@ -55,11 +55,19 @@ class Scarper:
                 print('random error')
                 self.skipped.append(city_selected)
                 continue
+
             try:
                 self.driver.find_element(By.LINK_TEXT, cg.LINK_SELECT).click()
+            except NoSuchElementException as e:
+                self.driver.find_element(By.CLASS_NAME, cg.SELECT_CLOSE_BUTTON).click()  # close window in case of error
+                continue
+
+            try:
                 self.driver.find_element(By.ID, cg.SEARCH_BUTTON).click()  # perform search
             except NoSuchElementException as e:
                 self.driver.find_element(By.CLASS_NAME, cg.SELECT_CLOSE_BUTTON).click()  # close window in case of error
+                continue
+
             try:
                 correction_close = WebDriverWait(self.driver, 10) \
                     .until(EC.element_to_be_clickable((By.ID, cg.ALERT_EMPTY_RESULT)))
@@ -68,12 +76,14 @@ class Scarper:
             except TimeoutException:
                 print("no alert")
                 pass
+
             try:
                 pages = int([int(e) for e in 
                              self.driver.find_element(By.XPATH, cg.NUM_OF_RESULTS).get_attribute("innerText").split()
                              if e.isdigit()][0] / 10) + 1
             except NoSuchElementException as e3:
                 pages = 2
+
             try:
                 for p in range(1, pages + 1):
                     table = self.driver.find_element(By.XPATH, cg.RESULTS_TABLE)
@@ -100,6 +110,7 @@ class Scarper:
             except NoSuchElementException as e3:
                 self.skipped.append(city_selected)
                 continue
+
         return {'license': self.license,
                 'name': self.name,
                 'city': self.city,
