@@ -2,6 +2,7 @@ import geopandas as gpd
 from geopy.geocoders import Nominatim
 import pycristoforo as pyc
 import config as cg
+import pandas as pd
 
 
 class Geocoder:
@@ -19,7 +20,7 @@ class Geocoder:
         return [latitude, longitude]
 
     def city_exists(self, city):
-        if self.municipalities.MUN_HEB.str.contains(city).sum() == 1:
+        if self.municipalities[self.municipalities.MUN_HEB == city].shape[0] >= 1:
             return True
         else:
             return False
@@ -43,6 +44,13 @@ class Geocoder:
         return [self._set_location_single(city) for city in self.address]
 
 
+if __name__ == '__main__':
+    cities = pd.read_csv('final_one.csv', encoding='utf-8')
+    cities_list = cities['city'].tolist()
+    geocoder1 = Geocoder(address = cities_list)
+    result = geocoder1.set_location()
+    cities['loc'] = result
+    pd.DataFrame(cities).to_csv('final_one_points.csv', index=False)
 
 
 
