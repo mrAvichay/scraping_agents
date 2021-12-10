@@ -16,4 +16,5 @@ CITY = "//tr/td[7]"
 IS_PENSIONI = "//tr/td[8]"
 IS_ELEMENTAR = "//tr/td[9]"
 NEXT_RESULTS_PAGE = "//a[@ng-switch-when='next']"
-
+LOCATOR_NAME = 'aa'
+MUNICIPALITIES_FILENAME = 'municipalities.geojson'
