@@ -47,7 +47,7 @@ class Geocoder:
 if __name__ == '__main__':
     cities = pd.read_csv('final_one.csv', encoding='utf-8')
     cities_list = cities['city'].tolist()
-    geocoder1 = Geocoder(address = cities_list)
+    geocoder1 = Geocoder(address=cities_list)
     result = geocoder1.set_location()
     cities['loc'] = result
     pd.DataFrame(cities).to_csv('final_one_points.csv', index=False)

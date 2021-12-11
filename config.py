@@ -18,3 +18,4 @@ IS_ELEMENTAR = "//tr/td[9]"
 NEXT_RESULTS_PAGE = "//a[@ng-switch-when='next']"
 LOCATOR_NAME = 'aa'
 MUNICIPALITIES_FILENAME = 'municipalities.geojson'
+FINAL_FILE = 'full_file'

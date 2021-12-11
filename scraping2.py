@@ -33,7 +33,7 @@ class Scarper:
         return self.driver
 
     def get_name(self):
-        return self.scrapper_name
+        return str(self.scrapper_name)
 
     def extract(self):
         select_choice1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions) \
