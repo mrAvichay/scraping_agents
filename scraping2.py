@@ -10,9 +10,10 @@ import config as cg
 
 
 class Scarper:
-    def __init__(self, scrapper_name, cities_l):
+    def __init__(self, scrapper_name, cities_l, logger=None):
         self.scrapper_name = scrapper_name
         self.cities = cities_l
+        self.logger = logger
         self.license, \
         self.name, \
         self.mail, \
@@ -27,15 +28,18 @@ class Scarper:
 
     def set_driver(self):
         # access site
+        if self.logger:
+            self.logger.info('accessing site')
         self.driver.get(self.site)
         self.driver.implicitly_wait(10)
         self.driver.maximize_window()
-        return self.driver
 
     def get_name(self):
         return str(self.scrapper_name)
 
     def extract(self):
+        if self.logger:
+            self.logger.info('starting scraper:'+self.get_name())
         select_choice1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions) \
             .until(EC.presence_of_element_located((By.CLASS_NAME, cg.DROP_DOWN_LICENSE)))
         select_choice1.click()
@@ -44,7 +48,8 @@ class Scarper:
         agent_choice1.click()
         for i in range(0, len(self.cities)):
             city_selected = self.cities[i]
-            print(city_selected)
+            if self.logger:
+                self.logger.info('current city: '+city_selected)
 
             try:
                 search1 = WebDriverWait(self.driver, 10, ignored_exceptions=self.ignored_exceptions). \
@@ -53,29 +58,40 @@ class Scarper:
                 search1.send_keys(city_selected)
                 search1.send_keys(Keys.RETURN)
             except TimeoutException:
-                print('random error')
+                if self.logger:
+                    self.logger.info('timeout exception for '+city_selected+', skipping...')
                 self.skipped.append(city_selected)
                 continue
 
             try:
                 self.driver.find_element(By.LINK_TEXT, cg.LINK_SELECT).click()
             except NoSuchElementException as e:
-                self.driver.find_element(By.CLASS_NAME, cg.SELECT_CLOSE_BUTTON).click()  # close window in case of error
+                if self.logger:
+                    self.logger.info('no results for ' + city_selected + ',skipping...')
+                try:
+                    if self.logger:
+                        self.logger.info('exiting search')
+                    # close window in case of error
+                    self.driver.find_element(By.CLASS_NAME, cg.SELECT_CLOSE_BUTTON).click()
+                except NoSuchElementException as e:
+                    continue
                 continue
 
             try:
                 self.driver.find_element(By.ID, cg.SEARCH_BUTTON).click()  # perform search
             except NoSuchElementException as e:
+                if self.logger:
+                    self.logger.info('search button not found for ' + city_selected + ',skipping...')
                 self.driver.find_element(By.CLASS_NAME, cg.SELECT_CLOSE_BUTTON).click()  # close window in case of error
                 continue
 
             try:
                 correction_close = WebDriverWait(self.driver, 10) \
                     .until(EC.element_to_be_clickable((By.ID, cg.ALERT_EMPTY_RESULT)))
-                # print("alert accepted")
                 correction_close.click()
             except TimeoutException:
-                print("no alert")
+                if self.logger:
+                    self.logger.info('no alert for '+city_selected)
                 pass
 
             try:
@@ -86,6 +102,8 @@ class Scarper:
                 pages = 2
 
             try:
+                if self.logger:
+                    self.logger.info('extracting results for '+city_selected)
                 for p in range(1, pages + 1):
                     table = self.driver.find_element(By.XPATH, cg.RESULTS_TABLE)
                     # append element to lists
@@ -107,10 +125,17 @@ class Scarper:
                     self.is_elementar.extend(
                         [el.get_attribute("innerText") for el in table.find_elements(By.XPATH, cg.IS_ELEMENTAR)])
                     self.driver.find_element(By.XPATH, cg.NEXT_RESULTS_PAGE).click()  # click next
+                    if self.logger:
+                        self.logger.info('appending results for '+city_selected)
                     self.driver.implicitly_wait(5)
             except NoSuchElementException as e3:
+                if self.logger:
+                    self.logger.info('error while extracting results for '+city_selected+', skipping...')
                 self.skipped.append(city_selected)
                 continue
+        if self.logger:
+            self.logger.info('closing scraper '+self.get_name())
+        self.driver.close()
 
         return {'license': self.license,
                 'name': self.name,
@@ -123,7 +148,7 @@ if __name__ == '__main__':
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
     cities_list = cities['שם_ישוב'].sample(10).str.strip().tolist()
     scrapper1 = Scarper(scrapper_name='one', cities_l=cities_list)
-    driver1 = scrapper1.set_driver()
+    scrapper1.set_driver()
     data, skipped_items = scrapper1.extract()
     pd.DataFrame(data).to_csv('final_'+scrapper1.get_name()+'.csv', index=False)
     print("skipped on: " + ','.join(skipped_items))

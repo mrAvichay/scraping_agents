@@ -6,8 +6,9 @@ import pandas as pd
 
 
 class Geocoder:
-    def __init__(self, address):
+    def __init__(self, address,logger=None):
         self.address = address
+        self.logger = logger
         self.LOCATOR_NAME = cg.LOCATOR_NAME
         self.municipalities = gpd.read_file(cg.MUNICIPALITIES_FILENAME)
         self.longitude = []
@@ -41,6 +42,8 @@ class Geocoder:
             return self.geocode(city)
 
     def set_location(self):
+        if self.logger:
+            self.logger.info('running geocodes...')
         return [self._set_location_single(city) for city in self.address]
 
 
