@@ -1,3 +1,4 @@
+LISTS = 20
 SITE = "https://insa-prod-ex.formtitan.com/AgentsSearch#/"
 DROP_DOWN_LICENSE = 'select2-choice'
 AGENT_DD_CHOICE = "//div[@aria-label='סוכן ביטוח']"
@@ -19,3 +20,4 @@ NEXT_RESULTS_PAGE = "//a[@ng-switch-when='next']"
 LOCATOR_NAME = 'aa'
 MUNICIPALITIES_FILENAME = 'municipalities.geojson'
 FINAL_FILE = 'full_file.csv'
+CITIES_DICT = 'cities_dict.pickle'

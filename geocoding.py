@@ -1,23 +1,32 @@
 import geopandas as gpd
 from geopy.geocoders import Nominatim
+from geopy.extra.rate_limiter import RateLimiter
 import pycristoforo as pyc
 import config as cg
 import pandas as pd
+import pickle
+import logging
+import sys
 
 
 class Geocoder:
-    def __init__(self, address,logger=None):
+    def __init__(self, address, logger=None):
         self.address = address
         self.logger = logger
         self.LOCATOR_NAME = cg.LOCATOR_NAME
         self.municipalities = gpd.read_file(cg.MUNICIPALITIES_FILENAME)
         self.longitude = []
         self.latitude = []
+        if self.logger:
+            logger.info('loading cities matches')
+        with open(cg.CITIES_DICT, 'rb') as handle:
+            self.dict_cities = pickle.load(handle)
 
     def geocode(self, address):
-        geo_locator = Nominatim(user_agent=self.LOCATOR_NAME)
-        latitude = geo_locator.geocode(address).latitude
-        longitude = geo_locator.geocode(address).longitude
+        geo_locator = Nominatim(user_agent=self.LOCATOR_NAME, timeout=None)
+        geocode = RateLimiter(geo_locator.geocode, min_delay_seconds=1)
+        latitude = geocode(address).latitude
+        longitude = geocode(address).longitude
         return [latitude, longitude]
 
     def city_exists(self, city):
@@ -26,9 +35,15 @@ class Geocoder:
         else:
             return False
 
+    def city_match(self,city):
+        if self.dict_cities.get(city) == '':
+            return None
+        else:
+            return self.dict_cities.get(city)
+
     def get_polygon(self, city):
-        if self.city_exists(city):
-            return self.municipalities[self.municipalities.MUN_HEB == city].geometry.values[0]
+        if self.city_exists(city) and self.city_match(city):
+            return self.municipalities[self.municipalities.MUN_HEB == self.city_match(city)].geometry.values[0]
         else:
             return None
 
@@ -48,9 +63,18 @@ class Geocoder:
 
 
 if __name__ == '__main__':
+    logger = logging.getLogger('app')
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(created)f:%(levelname)s:%(name)s:%(module)s:%(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.info('starting logger')
+    logger.info('reading file')
     cities = pd.read_csv('final_one.csv', encoding='utf-8')
     cities_list = cities['city'].tolist()
-    geocoder1 = Geocoder(address=cities_list)
+    geocoder1 = Geocoder(address=cities_list, logger=logger)
     result = geocoder1.set_location()
     cities['loc'] = result
     pd.DataFrame(cities).to_csv('final_one_points.csv', index=False)

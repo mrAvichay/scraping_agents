@@ -1,19 +1,17 @@
 from geocoding import Geocoder
 from  scraping2 import Scarper
-from udf import split_list
+from udf import split_list, init_logger
 import pandas as pd
 import os
 import config as cg
-import logging
-import sys
 
 
-def run(input_list, retries=0, run_logger=None):
+def run(input_list, retries=0, run_logger=None, start_from=0):
     skipped_list = []
     if run_logger:
         run_logger.info('splitting cities to lists')
-    cities_splitted = list(split_list(input_list, 100))
-    for i in range(len(cities_splitted)):
+    cities_splitted = list(split_list(input_list, cg.LISTS))
+    for i in range(start_from+1, len(cities_splitted)):
         scrapper = Scarper(scrapper_name=i, cities_l=cities_splitted[i], logger=run_logger)
         scrapper.set_driver()
         data, skipped_items = scrapper.extract()
@@ -44,13 +42,7 @@ def run(input_list, retries=0, run_logger=None):
 
 
 if __name__ == '__main__':
-    logger = logging.getLogger('app')
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(created)f:%(levelname)s:%(name)s:%(module)s:%(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    logger, handler = init_logger()
     logger.info('starting logger')
     logger.info('reading cities list')
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
@@ -59,4 +51,3 @@ if __name__ == '__main__':
     pd.DataFrame(final).to_csv(cg.FINAL_FILE, index=False)
     logger.info('finished successfully')
     logger.removeHandler(handler)
-    logging.shutdown()
