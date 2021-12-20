@@ -35,7 +35,8 @@ def run(input_list, retries=0, run_logger=None, start_from=0):
         run_logger.info('adding geocode')
     geo_coder = Geocoder(address=df_list, logger=run_logger)
     result = geo_coder.set_location()
-    full_df['loc'] = result
+    full_df['loc_X'] = [loc[0] for loc in result]
+    full_df['loc_Y'] = [loc[1] for loc in result]
     for filename in files:
         os.remove(filename)
     return full_df

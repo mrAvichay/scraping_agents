@@ -25,8 +25,12 @@ class Geocoder:
     def geocode(self, address):
         geo_locator = Nominatim(user_agent=self.LOCATOR_NAME, timeout=None)
         geocode = RateLimiter(geo_locator.geocode, min_delay_seconds=1)
-        latitude = geocode(address).latitude
-        longitude = geocode(address).longitude
+        try:
+            latitude = geocode(address).latitude
+            longitude = geocode(address).longitude
+        except AttributeError as e:
+            latitude = 0
+            longitude = 0
         return [latitude, longitude]
 
     def city_exists(self, city):
@@ -35,7 +39,7 @@ class Geocoder:
         else:
             return False
 
-    def city_match(self,city):
+    def city_match(self, city):
         if self.dict_cities.get(city) == '':
             return None
         else:
@@ -72,12 +76,13 @@ if __name__ == '__main__':
     logger.addHandler(handler)
     logger.info('starting logger')
     logger.info('reading file')
-    cities = pd.read_csv('final_one.csv', encoding='utf-8')
+    cities = pd.read_csv('final_8.csv', encoding='utf-8')
     cities_list = cities['city'].tolist()
     geocoder1 = Geocoder(address=cities_list, logger=logger)
     result = geocoder1.set_location()
-    cities['loc'] = result
-    pd.DataFrame(cities).to_csv('final_one_points.csv', index=False)
+    cities['loc_X'] = [loc[0] for loc in result]
+    cities['loc_Y'] = [loc[1] for loc in result]
+    pd.DataFrame(cities).to_csv('final_8_points.csv', index=False)
 
 
 
