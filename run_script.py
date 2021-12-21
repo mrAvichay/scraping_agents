@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logger.info('reading cities list')
     cities = pd.read_csv('cities2.csv', encoding='windows-1255')
     cities_list = cities['שם_ישוב'].str.strip().tolist()
-    final = run(cities_list, run_logger=logger)
+    final = run(cities_list, run_logger=logger,start_from=53)
     pd.DataFrame(final).to_csv(cg.FINAL_FILE, index=False)
     logger.info('finished successfully')
     logger.removeHandler(handler)

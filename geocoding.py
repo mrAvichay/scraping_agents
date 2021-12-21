@@ -5,8 +5,8 @@ import pycristoforo as pyc
 import config as cg
 import pandas as pd
 import pickle
-import logging
-import sys
+import os
+from udf import init_logger
 
 
 class Geocoder:
@@ -67,22 +67,38 @@ class Geocoder:
 
 
 if __name__ == '__main__':
-    logger = logging.getLogger('app')
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(created)f:%(levelname)s:%(name)s:%(module)s:%(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+    logger, handler = init_logger()
     logger.info('starting logger')
     logger.info('reading file')
-    cities = pd.read_csv('final_8.csv', encoding='utf-8')
-    cities_list = cities['city'].tolist()
-    geocoder1 = Geocoder(address=cities_list, logger=logger)
-    result = geocoder1.set_location()
-    cities['loc_X'] = [loc[0] for loc in result]
-    cities['loc_Y'] = [loc[1] for loc in result]
-    pd.DataFrame(cities).to_csv('final_8_points.csv', index=False)
+
+    files_to_read = [f for f in os.listdir()
+                     if f[-4:] == '.csv'
+                     and f[:5] == 'final' and 'points' not in f]
+
+    list_read = [f.replace('_points', '') for f in os.listdir()
+                 if f[-4:] == '.csv'
+                 and f[:5] == 'final' and 'points' in f]
+
+    if len(list_read) > 0:
+        files_to_read = list(set(files_to_read).difference(set(list_read)))
+
+    if len(files_to_read) > 0:
+        for f in files_to_read:
+            logger.info('reading '+f)
+            cities = pd.read_csv(f, encoding='utf-8')
+            cities_list = cities['city'].tolist()
+            logger.info('cities in file: '+','.join(list(set(cities_list))))
+            geocoder1 = Geocoder(address=cities_list, logger=logger)
+            result = geocoder1.set_location()
+            cities['loc_X'] = [loc[0] for loc in result]
+            cities['loc_Y'] = [loc[1] for loc in result]
+            pd.DataFrame(cities).to_csv(f+'_points.csv', index=False)
+            logger.info('finished '+f+', moving on...')
+    else:
+        logger.info('no files to geocode')
+
+    logger.info('finished successfully')
+    logger.removeHandler(handler)
 
 
 
