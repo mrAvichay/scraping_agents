@@ -24,21 +24,26 @@ def run(input_list, retries=0, run_logger=None, start_from=0):
     if run_logger:
         run_logger.info('merging files')
     files = [f for f in os.listdir() if f[-4:] == '.csv' and f[:5] == 'final']
-    li = []
     for filename in files:
         df = pd.read_csv(filename, encoding='utf-8')
-        if len(df) != 0:
-            li.append(df)
+        df_list = df.city.to_list()
+        if run_logger:
+            run_logger.info('adding geocode for '+filename)
+        geo_coder = Geocoder(address=df_list, logger=run_logger)
+        result = geo_coder.set_location()
+        df['loc_X'] = [loc[0] for loc in result]
+        df['loc_Y'] = [loc[1] for loc in result]
+        df.to_csv(filename.replace('.csv', '') + '_points.csv', index=False)
+        if run_logger:
+            logger.info('finished ' + filename + ', moving on...')
+
+    li = [pd.read_csv(f) for f in os.listdir()
+          if f[-4:] == '.csv'
+          and 'final' in f
+          and 'points' in f]
+
     full_df = pd.concat(li, axis=0)
-    df_list = full_df['city'].tolist()
-    if run_logger:
-        run_logger.info('adding geocode')
-    geo_coder = Geocoder(address=df_list, logger=run_logger)
-    result = geo_coder.set_location()
-    full_df['loc_X'] = [loc[0] for loc in result]
-    full_df['loc_Y'] = [loc[1] for loc in result]
-    for filename in files:
-        os.remove(filename)
+
     return full_df
 
 
