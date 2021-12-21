@@ -1,0 +1,23 @@
+LISTS = 20
+SITE = "https://insa-prod-ex.formtitan.com/AgentsSearch#/"
+DROP_DOWN_LICENSE = 'select2-choice'
+AGENT_DD_CHOICE = "//div[@aria-label='סוכן ביטוח']"
+SEARCH_BOX = "e_1602060984227-254-72"
+LINK_SELECT = "בחר"
+SEARCH_BUTTON = "e_1596528447512-995-1"
+SELECT_CLOSE_BUTTON = "close-button-div"
+ALERT_EMPTY_RESULT = "close_correction_error"
+NUM_OF_RESULTS = "//div[@class='TablePagerTotal']"
+RESULTS_TABLE = "//table/tbody"
+LICENSE = "//tr/td[1]"
+NAME = "//tr/td[2]"
+MAIL = "//tr/td[3]"
+AGENCY = "//tr/td[7]"
+CITY = "//tr/td[7]"
+IS_PENSIONI = "//tr/td[8]"
+IS_ELEMENTAR = "//tr/td[9]"
+NEXT_RESULTS_PAGE = "//a[@ng-switch-when='next']"
+LOCATOR_NAME = 'aa'
+MUNICIPALITIES_FILENAME = 'municipalities.geojson'
+FINAL_FILE = 'full_file.csv'
+CITIES_DICT = 'cities_dict.pickle'
